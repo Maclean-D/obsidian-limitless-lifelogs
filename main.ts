@@ -120,7 +120,9 @@ export default class LimitlessLifelogsPlugin extends Plugin {
 
 	private formatLifelogMarkdown(lifelog: any): string {
 		if (lifelog.markdown) {
-			return lifelog.markdown;
+			// Reformat Markdown
+			const reformattedMarkdown = lifelog.markdown.replaceAll('\n\n', '\n');
+			return reformattedMarkdown;
 		}
 
 		const content: string[] = [];
