@@ -33,7 +33,7 @@ export default class LimitlessLifelogsPlugin extends Plugin {
 		// Add command for syncing
 		this.addCommand({
 			id: 'sync-limitless-lifelogs',
-			name: 'Sync Limitless Lifelogs',
+			name: 'Sync',
 			callback: async () => {
 				await this.syncLifelogs();
 			}
@@ -194,7 +194,7 @@ class LimitlessLifelogsSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('API Key')
+			.setName('API key')
 			.setDesc('Your Limitless AI API key')
 			.addText(text => text
 				.setPlaceholder('Enter your API key')
@@ -205,7 +205,7 @@ class LimitlessLifelogsSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Folder Path')
+			.setName('Folder path')
 			.setDesc('Where to store the lifelog entries')
 			.addText(text => text
 				.setPlaceholder('Folder path')
@@ -216,7 +216,7 @@ class LimitlessLifelogsSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Start Date')
+			.setName('Start date')
 			.setDesc('Default start date for initial sync (YYYY-MM-DD)')
 			.addText(text => text
 				.setPlaceholder('YYYY-MM-DD')
