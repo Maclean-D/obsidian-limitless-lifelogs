@@ -96,8 +96,8 @@ export default class LimitlessLifelogsPlugin extends Plugin {
 	}
 
 	private async ensureFolderExists(path: string) {
-		const folderExists = await this.app.vault.adapter.exists(path);
-		if (!folderExists) {
+		const folder = this.app.vault.getFolderByPath(path);
+		if (!folder) {
 			await this.app.vault.createFolder(path);
 		}
 	}
@@ -105,14 +105,15 @@ export default class LimitlessLifelogsPlugin extends Plugin {
 	private async getLastSyncedDate(): Promise<Date | null> {
 		const folderPath = normalizePath(this.settings.folderPath);
 		try {
-			const files = await this.app.vault.adapter.list(folderPath);
-			const dates = files.files
-				.map(file => file.split('/').pop()?.replace('.md', ''))
-				.filter(date => date && /^\d{4}-\d{2}-\d{2}$/.test(date))
-				.map(date => new Date(date as string))
+			const files = this.app.vault.getFiles()
+				.filter(file => file.path.startsWith(folderPath + '/'))
+				.filter(file => file.path.endsWith('.md'))
+				.map(file => file.basename)
+				.filter(basename => /^\d{4}-\d{2}-\d{2}$/.test(basename))
+				.map(basename => new Date(basename))
 				.sort((a, b) => b.getTime() - a.getTime());
 
-			return dates.length > 0 ? dates[0] : null;
+			return files.length > 0 ? files[0] : null;
 		} catch {
 			return null;
 		}
