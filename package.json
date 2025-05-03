@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-limitless-lifelogs",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "Download and sync your Limitless AI lifelog entries into Obsidian markdown files.",
 	"main": "main.js",
 	"scripts": {
