@@ -233,6 +233,8 @@ class LimitlessAPI {
 	private apiKey: string;
 	private baseUrl = 'https://api.limitless.ai';
 	private batchSize = 10;
+	private maxRetries = 5;
+	private retryDelay = 1000; // 1 second
 
 	constructor(apiKey: string) {
 		this.apiKey = apiKey;
@@ -261,20 +263,7 @@ class LimitlessAPI {
 			}
 
 			try {
-				const response = await requestUrl({
-					url: `${this.baseUrl}/v1/lifelogs?${params.toString()}`,
-					method: 'GET',
-					headers: {
-						'X-API-Key': this.apiKey,
-						'Content-Type': 'application/json'
-					}
-				});
-
-				if (!response.json) {
-					throw new Error('Invalid response format');
-				}
-
-				const data = response.json;
+				const data = await this.makeRequest(`${this.baseUrl}/v1/lifelogs`, params);
 				const lifelogs = data.data?.lifelogs || [];
 				allLifelogs.push(...lifelogs);
 
@@ -286,5 +275,50 @@ class LimitlessAPI {
 		} while (cursor);
 
 		return allLifelogs;
+	}
+
+	private async makeRequest(url: string, params: URLSearchParams): Promise<any> {
+		let retries = 0;
+		while (true) {
+			try {
+				const response = await requestUrl({
+					url: `${url}?${params.toString()}`,
+					method: 'GET',
+					headers: {
+						'X-API-Key': this.apiKey,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (!response.json) {
+					throw new Error('Invalid response format');
+				}
+
+				return response.json;
+			} catch (error) {
+				if (error.status === 429 && retries < this.maxRetries) {
+					let delay = this.retryDelay * Math.pow(2, retries);
+					const retryAfter = error.headers?.['retry-after'];
+
+					if (retryAfter) {
+						const retryAfterSeconds = parseInt(retryAfter, 10);
+						if (!isNaN(retryAfterSeconds)) {
+							delay = retryAfterSeconds * 1000;
+						} else {
+							const retryAfterDate = new Date(retryAfter);
+							const now = new Date();
+							delay = retryAfterDate.getTime() - now.getTime();
+						}
+					}
+
+					new Notice(`Rate limit exceeded. Retrying in ${Math.round(delay / 1000)} seconds...`);
+					await new Promise(resolve => setTimeout(resolve, delay));
+					retries++;
+				} else {
+					console.error('Error making request:', error);
+					throw error;
+				}
+			}
+		}
 	}
 }
