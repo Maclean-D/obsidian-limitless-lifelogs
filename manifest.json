@@ -1,7 +1,7 @@
 {
 	"id": "limitless-lifelogs",
 	"name": "Limitless Lifelogs",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"minAppVersion": "0.15.0",
 	"description": "Sync your Limitless AI lifelog entries",
 	"author": "Maclean Dunkin",
